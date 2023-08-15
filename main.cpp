@@ -2,9 +2,11 @@
 #include <hmac_sha512.h>
 #include <openssl/ripemd.h>
 #include <openssl/sha.h>
+#include <db.h>
 
-#include <secp256k1/include/secp256k1.h>
+#include <secp256k1.h>
 
+#include <unistd.h>
 #include <string.h>
 #include <vector>
 #include <cstdio>
@@ -29,7 +31,6 @@ void generate_keypair(secp256k1_context* ctx, char* key, char* pubkeyhash)
             bytewif.push_back(key[i]);
         }
         std::string wif = EncodeBase58Check(bytewif, true);
-        //printf("%s\n", wif.c_str());
 
         // to base58 (pubwif)
         std::vector<unsigned char> ripemd;
@@ -37,14 +38,21 @@ void generate_keypair(secp256k1_context* ctx, char* key, char* pubkeyhash)
         for (unsigned int i=0; i<20; i++) {
             ripemd.push_back(pubkeyhash[i]);
         }
-        std::string rip =  EncodeBase58Check(ripemd, false);
-        printf("%s\n", rip.c_str());
+        std::string rip = EncodeBase58Check(ripemd, false);
+
+        if (exists_in_db(rip)) {
+            printf("found a key\n");
+            printf("%s\n", rip.c_str());
+            printf("%s\n", wif.c_str());
+            sleep(50);
+        }
 }
 
 void get_hex_seed(size_t bitlen, uint32_t incr, char *data);
 
 int main()
 {
+        initdb();
 
 	static const unsigned char hashkey[] = {'B','i','t','c','o','i','n',' ','s','e','e','d'};
 
@@ -58,6 +66,8 @@ int main()
         char pubkeyhash[20], privkey[32];
 
         while (true) {
+            printf("\r%08x", incr);
+
             get_hex_seed(bitlen, incr++, seed);
 	    CHMAC_SHA512(hashkey, sizeof(hashkey)).Write((const unsigned char*)seed, 32).Finalize(vout.data());
 

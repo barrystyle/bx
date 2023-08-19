@@ -69,7 +69,7 @@ int main()
             printf("\r%08x", incr);
 
             get_hex_seed(bitlen, incr++, seed);
-	    CHMAC_SHA512(hashkey, sizeof(hashkey)).Write((const unsigned char*)seed, 32).Finalize(vout.data());
+	    CHMAC_SHA512(hashkey, sizeof(hashkey)).Write((const unsigned char*)seed, bitlen / 8).Finalize(vout.data());
 
             //for (unsigned int i=0; i<64; i++) {
             //    printf("%02hhx", vout[i]);

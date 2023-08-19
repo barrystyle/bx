@@ -58,5 +58,5 @@ void get_hex_seed(size_t bitlen, uint32_t incr, char *data)
 {
     increment = incr;
     const auto seed = new_seed(bitlen);
-    memcpy(data, seed.data(), 32);
+    memcpy(data, seed.data(), bitlen / 8);
 }

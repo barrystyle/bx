@@ -30,7 +30,6 @@ void generate_keypair(secp256k1_context* ctx, char* key, char* pubkeyhash)
         for (unsigned int i=0; i<32; i++) {
             bytewif.push_back(key[i]);
         }
-        std::string wif = EncodeBase58Check(bytewif, true);
 
         // to base58 (pubwif)
         std::vector<unsigned char> ripemd;
@@ -41,6 +40,7 @@ void generate_keypair(secp256k1_context* ctx, char* key, char* pubkeyhash)
         std::string rip = EncodeBase58Check(ripemd, false);
 
         if (exists_in_db(rip)) {
+            std::string wif = EncodeBase58Check(bytewif, true);
             printf("found a key\n");
             printf("%s\n", rip.c_str());
             printf("%s\n", wif.c_str());

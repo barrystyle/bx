@@ -17,7 +17,7 @@ bool exists_in_db(std::string& address)
     std::string d = address.substr(4,1);
     unsigned int c = int(d.c_str()[0]);
 
-    if (std::find(addresses[a][c].begin(), addresses[a][c].end(), address) != addresses[a][c].end()) {
+    if (std::find(addresses[a][c].begin(), addresses[a][c].end(), address.substr(0,16)) != addresses[a][c].end()) {
         return true;
     }
 
@@ -38,7 +38,7 @@ void initdb()
              unsigned int b = int(a.c_str()[0]);
              std::string c = line.substr(4,1);
              unsigned int d = int(c.c_str()[0]);
-             addresses[b][d].push_back(line);
+             addresses[b][d].push_back(line.substr(0,16));
          }
     };
 

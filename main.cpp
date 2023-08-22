@@ -1,14 +1,9 @@
-#include <base58.h>
-#include <crypto/hmac_sha512.h>
-#include <openssl/ripemd.h>
-#include <openssl/sha.h>
 #include <db.h>
-
-#include <iostream>
 
 #include <unistd.h>
 #include <string.h>
 
+#include <iostream>
 #include <thread>
 #include <vector>
 #include <cstdio>

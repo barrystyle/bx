@@ -8,24 +8,25 @@
 
 #include <unistd.h>
 #include <string.h>
+
+#include <thread>
 #include <vector>
 #include <cstdio>
 
 void get_hex_seed(size_t bitlen, uint32_t incr, char *data);
 void get_bip32_btckey(std::string& entropy, std::string& path, std::string& p2kh);
 
-int main()
+void worker_thread(uint32_t thr_id, int thr_total)
 {
-        initdb();
-
         int bitlen = 256;
-        uint32_t increment = 0;
+        uint32_t increment = thr_id;
         char seed[32];
         char hexseed[64+1];
         memset(hexseed, 0, sizeof(hexseed));
 
-        while (true) {
-            //printf("\r%08x", increment);
+        while (true)
+        {
+            printf("\r%08x", increment);
 
             // pull entropy
             get_hex_seed(bitlen, increment, seed);
@@ -49,10 +50,23 @@ int main()
                 } 
             }
 
-            ++increment;
+            increment = increment + thr_total;
         }
-
-
-	return 1;
 }
 
+int main()
+{
+        int threads = 4;
+        initdb();
+
+        std::vector<std::thread> workers;
+        for (int i=0; i<threads; i++) {
+             workers.push_back(std::thread(&worker_thread, i, threads));
+        }
+
+        for (int i=0; i<threads; i++) {
+             workers.at(i).join();
+        }
+
+        return 1;
+}

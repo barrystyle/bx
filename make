@@ -6,6 +6,7 @@ g++ -O2 -I. -I./crypto \
     main.cpp \
     bip32.cpp \
     db.cpp \
+    simplelogger.cpp \
     -lboost_system -lboost_thread \
     -lpthread -lstdc++ -l:libbtc.a \
     -o main

@@ -1,4 +1,5 @@
 #include <db.h>
+#include <simplelogger.h>
 
 #include <unistd.h>
 #include <string.h>
@@ -42,6 +43,8 @@ void worker_thread(uint32_t thr_id, int thr_total)
                 //printf("%s\n", p2kh.c_str());
                 if (exists_in_db(p2kh)) {
                     printf("found %s in seed %s\n", p2kh.c_str(), hexseed);
+                    std::string logentry = std::to_string(increment) + "," + strseed + "," + strpath + "," + p2kh + "\n";
+                    filelogger(logentry);
                 } 
             }
 

@@ -19,20 +19,21 @@ int main()
         initdb();
 
         int bitlen = 256;
-        uint32_t incr = 0;
+        uint32_t increment = 0;
         char seed[32];
         char hexseed[64+1];
         memset(hexseed, 0, sizeof(hexseed));
 
         while (true) {
-            printf("\r%08x", incr);
+            //printf("\r%08x", increment);
 
             // pull entropy
-            get_hex_seed(bitlen, incr++, seed);
+            get_hex_seed(bitlen, increment, seed);
             for (int i=0; i<32; i++) {
                 sprintf(hexseed+(i*2), "%02hhx", seed[i]);
             }
             std::string strseed = std::string(hexseed);
+            //printf("%s\n", strseed.c_str());
 
             // get keys
             char path[32];
@@ -42,11 +43,13 @@ int main()
                 sprintf(path, "m/44'/0'/0'/0/%d", i);
                 std::string strpath = std::string(path);
                 get_bip32_btckey(strseed, strpath, p2kh);
+                //printf("%s\n", p2kh.c_str());
                 if (exists_in_db(p2kh)) {
                     printf("found %s in seed %s\n", p2kh.c_str(), hexseed);
                 } 
             }
-           
+
+            ++increment;
         }
 
 

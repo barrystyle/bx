@@ -7,9 +7,11 @@ g++ -O2 -I. -I./crypto \
     seed.cpp \
     main.cpp \
     base58.cpp \
+    bip32.cpp \
     db.cpp \
     -lboost_system -lboost_thread \
     -lpthread -lstdc++ -lcrypto -lssl \
+    -l:libbtc.a \
     -o main
 
 g++ -O2 -I. -I./crypto \

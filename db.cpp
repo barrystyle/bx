@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <vector>
 
-#define PARTIAL 24
+#define PARTIAL 12
 std::vector<std::string> addresses[127][127];
 
 bool exists_in_db(std::string& address)
@@ -47,12 +47,14 @@ void initdb()
 
     std::string line;
     while (std::getline(file, line)) {
+       if (line.substr(0, 3) != std::string("bc1")) {
          ++entries;
          std::string a = line.substr(6,1);
          unsigned int b = int(a.c_str()[0]);
          std::string c = line.substr(7,1);
          unsigned int d = int(c.c_str()[0]);
          addresses[b][d].push_back(line.substr(0, PARTIAL));
+       }
     };
 
     printf("%d addresses loaded..\n", entries);

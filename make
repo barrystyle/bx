@@ -14,5 +14,5 @@ g++ -O2 -I. -I./crypto \
     util.cpp \
     -lboost_system -lboost_thread \
     -lpthread -lstdc++ -l:libbtc.a \
-    -march=native
+    -march=native \
     -o main

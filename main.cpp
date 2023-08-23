@@ -18,6 +18,18 @@ extern "C" {
     void btc_ecc_stop();
 }
 
+// global progress variable
+uint32_t progress{0};
+
+void print_progress()
+{
+	while (true)
+	{
+		printf("%08x\n", progress);
+		sleep(15);
+	}
+}
+
 void worker_thread(uint32_t thr_id, int thr_total)
 {
         int bitlen = 256;
@@ -28,7 +40,10 @@ void worker_thread(uint32_t thr_id, int thr_total)
 
         while (true)
         {
-            printf("\r%08x", increment);
+            // set global variable
+            if (increment > progress) {
+                progress = increment;
+            }
 
             // pull entropy
             get_hex_entropy(bitlen, increment, entropy);
@@ -71,7 +86,9 @@ int main()
          workers.push_back(std::thread(&worker_thread, i, threads));
     }
 
-    for (int i=0; i<threads; i++) {
+    workers.push_back(std::thread(&print_progress));
+
+    for (int i=0; i<threads+1; i++) {
          workers.at(i).join();
     }
 

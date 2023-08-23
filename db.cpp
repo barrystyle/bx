@@ -55,8 +55,7 @@ void initdb()
          unsigned int d = int(c.c_str()[0]);
          addresses[b][d].push_back(line.substr(0, PARTIAL));
        }
-       printf("\r%d addresses loaded..", entries);
     };
 
-    printf("\n");
+    printf("%d addresses loaded..\n", entries);
 }

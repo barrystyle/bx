@@ -40,16 +40,16 @@ void pseudo_random_fill(data_chunk& chunk, uint32_t increment)
     }
 }
 
-data_chunk new_seed(size_t bit_length, uint32_t increment)
+data_chunk new_entropy(size_t bit_length, uint32_t increment)
 {
-    size_t fill_seed_size = bit_length / byte_bits;
-    data_chunk seed(fill_seed_size);
-    pseudo_random_fill(seed, increment);
-    return seed;
+    size_t fill_entropy_size = bit_length / byte_bits;
+    data_chunk entropy(fill_entropy_size);
+    pseudo_random_fill(entropy, increment);
+    return entropy;
 }
 
-void get_hex_seed(size_t bitlen, uint32_t increment, char *data)
+void get_hex_entropy(size_t bitlen, uint32_t increment, char *data)
 {
-    const auto seed = new_seed(bitlen, increment);
-    memcpy(data, seed.data(), bitlen / 8);
+    const auto entropy = new_entropy(bitlen, increment);
+    memcpy(data, entropy.data(), bitlen / 8);
 }

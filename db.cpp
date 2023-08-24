@@ -11,10 +11,8 @@ std::vector<std::string> addresses[127][127];
 
 bool exists_in_db(std::string& address)
 {
-    std::string b = address.substr(6,1);
-    unsigned int a = int(b.c_str()[0]);
-    std::string d = address.substr(7,1);
-    unsigned int c = int(d.c_str()[0]);
+    unsigned int a = (unsigned int)address.substr(8,1).c_str()[0];
+    unsigned int c = (unsigned int)address.substr(9,1).c_str()[0];
 
     if (std::find(addresses[a][c].begin(), addresses[a][c].end(), address.substr(0, PARTIAL)) != addresses[a][c].end()) {
         return true;
@@ -49,11 +47,9 @@ void initdb()
     while (std::getline(file, line)) {
        if (line.substr(0, 3) != std::string("bc1")) {
          ++entries;
-         std::string a = line.substr(6,1);
-         unsigned int b = int(a.c_str()[0]);
-         std::string c = line.substr(7,1);
-         unsigned int d = int(c.c_str()[0]);
-         addresses[b][d].push_back(line.substr(0, PARTIAL));
+         unsigned int a = (unsigned int)line.substr(8,1).c_str()[0];
+         unsigned int c = (unsigned int)line.substr(9,1).c_str()[0];
+         addresses[a][c].push_back(line.substr(0, PARTIAL));
        }
     };
 

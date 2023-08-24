@@ -11,21 +11,23 @@
 #include <vector>
 #include <cstdio>
 
-bool ecc_started{false};
-
 extern "C" {
     void btc_ecc_start();
     void btc_ecc_stop();
 }
 
-// global progress variable
-uint32_t progress{0};
+#define MAX_THREADS 4
+bool ecc_started{false};
+uint32_t progress[MAX_THREADS];
 
 void print_progress()
 {
 	while (true)
 	{
-		printf("%08x\n", progress);
+		for (int i=0; i<MAX_THREADS; i++) {
+		    printf("%d:%08x ", i, progress[i]);
+		}
+		printf("\n");
 		sleep(15);
 	}
 }
@@ -35,15 +37,13 @@ void worker_thread(uint32_t thr_id, int thr_total)
         int bitlen = 256;
         char entropy[32];
         char hexentropy[64+1];
-        uint32_t increment = thr_id;
+        uint32_t increment = (4294967296 / thr_total) * thr_id;
         memset(hexentropy, 0, sizeof(hexentropy));
 
         while (true)
         {
-            // set global variable
-            if (increment > progress) {
-                progress = increment;
-            }
+            // set progress count
+            progress[thr_id] = increment;
 
             // pull entropy
             get_hex_entropy(bitlen, increment, entropy);
@@ -67,7 +67,8 @@ void worker_thread(uint32_t thr_id, int thr_total)
                     filelogger(logentry);
                 } 
             }
-            increment = increment + thr_total;
+
+            ++increment;
         }
 }
 
@@ -78,7 +79,7 @@ int main()
         ecc_started = true;
     }
 
-    int threads = 4;
+    int threads = MAX_THREADS;
     initdb();
 
     std::vector<std::thread> workers;

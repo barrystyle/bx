@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 class Timer
 {

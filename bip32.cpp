@@ -4,7 +4,10 @@
 #include <btc/utils.h>
 
 #include <bip39.h>
+#include <timer.h>
 #include <util.h>
+
+#define DEBUG 0
 
 void get_bip32_btckey(std::string& seed, std::string& path, int start, int last, std::vector<std::string>& p2khlist)
 {
@@ -34,6 +37,8 @@ void get_bip32_btckey(std::string& seed, std::string& path, int start, int last,
 
 void entropy_to_p2kh(std::string& entropy, int bitlen, std::string& path, int start, int last, std::vector<std::string>& p2khlist)
 {
+    Timer leg1, leg2;
+
     // entropy-hex to entropy-bin
     unsigned char entropy_bin[32];
     std::vector<uint8_t> entropy_;
@@ -49,13 +54,32 @@ void entropy_to_p2kh(std::string& entropy, int bitlen, std::string& path, int st
     memset(bip39seed, 0, sizeof(bip39seed));
 
     // bip39seed from mnemonic
+#if DEBUG
+    leg1.start();
+#endif
     std::string mnemonic = CMnemonic::FromData(entropy_, bitlen/8);
     CMnemonic::ToSeed(mnemonic, std::string(""), seed);
     for (int i=0; i<seed.size(); i++) {
         sprintf(bip39seed+(i*2), "%02hhx", seed[i]);
     }
     std::string seed_ = std::string(bip39seed);
+#if DEBUG
+    leg1.stop();
+#endif
 
     // derive p2kh from bip39seed
+#if DEBUG
+    leg2.start();
+#endif
     get_bip32_btckey(seed_, path, start, last, p2khlist);
+#if DEBUG
+    leg2.stop();
+#endif
+
+#if DEBUG
+    uint64_t words = leg1.between_nanoseconds();
+    uint64_t bip32 = leg2.between_nanoseconds();
+
+    printf("%llu %llu\n", words, bip32);
+#endif
 }

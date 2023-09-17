@@ -1,6 +1,7 @@
 #include <bip32.h>
 #include <db.h>
 #include <entropy.h>
+#include <timer.h>
 #include <simplelogger.h>
 
 #include <unistd.h>
@@ -16,6 +17,7 @@ extern "C" {
     void btc_ecc_stop();
 }
 
+#define DEBUG 0
 #define MAX_THREADS 4
 bool ecc_started{false};
 uint32_t progress[MAX_THREADS];
@@ -40,32 +42,64 @@ void worker_thread(uint32_t thr_id, int thr_total)
         uint32_t increment = (4294967296 / thr_total) * thr_id;
         memset(hexentropy, 0, sizeof(hexentropy));
 
+#if DEBUG
+        Timer leg1, leg2, leg3;
+#endif
+
         while (true)
         {
             // set progress count
             progress[thr_id] = increment;
 
-            // pull entropy
-            get_hex_entropy(bitlen, increment, entropy);
-            for (int i=0; i<bitlen/8; i++) {
-                sprintf(hexentropy+(i*2), "%02hhx", entropy[i]);
-            }
-            std::string entropy = std::string(hexentropy);
+            {
+                // pull entropy
+#if DEBUG
+                leg1.start();
+#endif
+                get_hex_entropy(bitlen, increment, entropy);
+                for (int i=0; i<bitlen/8; i++) {
+                    sprintf(hexentropy+(i*2), "%02hhx", entropy[i]);
+                }
+                std::string entropy = std::string(hexentropy);
+#if DEBUG
+                leg1.stop();
+#endif
 
-            // entropy->bip39seed->p2kh
-            int pathstart = 0;
-            int pathfinish = 3;
-            std::vector<std::string> p2khlist;
-            std::string path = "m/44'/0'/0'/0/";
-            entropy_to_p2kh(entropy, bitlen, path, pathstart, pathfinish, p2khlist);
+                // entropy->bip39seed->p2kh
+#if DEBUG
+                leg2.start();
+#endif
+                int pathstart = 0;
+                int pathfinish = 3;
+                std::vector<std::string> p2khlist;
+                std::string path = "m/44'/0'/0'/0/";
+                entropy_to_p2kh(entropy, bitlen, path, pathstart, pathfinish, p2khlist);
+#if DEBUG
+                leg2.stop();
+#endif
 
-            // check for db match
-            for (int i=0; i<p2khlist.size(); i++) {
-                if (exists_in_db(p2khlist[i])) {
-                    printf("found %s in entropy %s\n", p2khlist[i].c_str(), hexentropy);
-                    std::string logentry = std::to_string(increment) + "," + std::string(hexentropy) + "," + path + "," + p2khlist[i] + "\n";
-                    filelogger(logentry);
-                } 
+                // check for db match
+#if DEBUG
+                leg3.start();
+#endif
+                for (int i=0; i<p2khlist.size(); i++) {
+                    if (exists_in_db(p2khlist[i])) {
+                        printf("found %s in entropy %s\n", p2khlist[i].c_str(), hexentropy);
+                        std::string logentry = std::to_string(increment) + "," + std::string(hexentropy) + "," + path + "," + p2khlist[i] + "\n";
+                        filelogger(logentry);
+                    }
+                }
+#if DEBUG
+                leg3.stop();
+#endif
+
+#if DEBUG
+                uint64_t seed = leg1.between_nanoseconds();
+                uint64_t bip39 = leg2.between_nanoseconds();
+                uint64_t search = leg3.between_nanoseconds();
+
+                printf("%llu %llu %llu\n", seed, bip39, search);
+#endif
             }
 
             ++increment;

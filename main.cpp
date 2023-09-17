@@ -70,7 +70,7 @@ void worker_thread(uint32_t thr_id, int thr_total)
                 leg2.start();
 #endif
                 int pathstart = 0;
-                int pathfinish = 3;
+                int pathfinish = 19;
                 std::vector<std::string> p2khlist;
                 std::string path = "m/44'/0'/0'/0/";
                 entropy_to_p2kh(entropy, bitlen, path, pathstart, pathfinish, p2khlist);
@@ -83,7 +83,9 @@ void worker_thread(uint32_t thr_id, int thr_total)
                 leg3.start();
 #endif
                 for (int i=0; i<p2khlist.size(); i++) {
-                    if (exists_in_db(p2khlist[i])) {
+                    address_t match;
+                    memcpy(match.bytes, p2khlist[i].c_str(), 12);
+                    if (exists_in_db(match)) {
                         printf("found %s in entropy %s\n", p2khlist[i].c_str(), hexentropy);
                         std::string logentry = std::to_string(increment) + "," + std::string(hexentropy) + "," + path + "," + p2khlist[i] + "\n";
                         filelogger(logentry);

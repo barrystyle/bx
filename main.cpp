@@ -24,13 +24,21 @@ uint32_t progress[MAX_THREADS];
 
 void print_progress()
 {
+	uint32_t lastprogress[MAX_THREADS];
+	for (int i=0; i<MAX_THREADS; i++) {
+		lastprogress[i] = 0;
+	}
+
 	while (true)
 	{
 		for (int i=0; i<MAX_THREADS; i++) {
-		    printf("%d:%08x ", i, progress[i]);
+			uint32_t work = (progress[i]-lastprogress[i]) * 12;
+			if (work < 0) work = 0;
+			printf("%d:%08x (%d/min) ", i, progress[i], work);
+			lastprogress[i] = progress[i];
 		}
 		printf("\n");
-		sleep(15);
+		sleep(5);
 	}
 }
 

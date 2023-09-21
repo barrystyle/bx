@@ -1,13 +1,24 @@
 #include <string.h>
 #include <string>
+#include <btc/base58.h>
 #include <btc/bip32.h>
 #include <btc/utils.h>
+#include <deriv.h>
 
 #include <bip39.h>
 #include <timer.h>
 #include <util.h>
 
 #define DEBUG 0
+extern derivation_type current;
+
+static void btc_hdnode_get_p2pkh_address1(const btc_hdnode* node, const btc_chainparams* chain, char* str, int strsize)
+{
+    uint8_t hash160[sizeof(uint160)+1];
+    hash160[0] = current == BTC_LEGACY ? 0x00 : 0x05;
+    btc_hdnode_get_hash160(node, hash160 + 1);
+    btc_base58_encode_check(hash160, sizeof(hash160), str, strsize);
+}
 
 void get_bip32_btckey(std::string& seed, std::string& path, int start, int last, std::vector<std::string>& p2khlist)
 {
@@ -29,7 +40,7 @@ void get_bip32_btckey(std::string& seed, std::string& path, int start, int last,
     for (int i=start; i<last; i++) {
         sprintf(path_, "%s%d", path.c_str(), i);
         btc_hd_generate_key(&node2, path_, private_key, chain_code, false);
-        btc_hdnode_get_p2pkh_address(&node2, &btc_chainparams_main, str, sizeof(str));
+        btc_hdnode_get_p2pkh_address1(&node2, &btc_chainparams_main, str, sizeof(str));
         p2kh_address = std::string(str);
         p2khlist.push_back(p2kh_address);
     }

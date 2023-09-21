@@ -1,4 +1,5 @@
 #include <db.h>
+#include <deriv.h>
 #include <timer.h>
 
 #include <stdio.h>
@@ -12,6 +13,7 @@
 #define DEBUG 0
 
 #define PARTIAL 12
+extern derivation_type current;
 std::vector<address_t> addresses[127][127];
 
 bool match_address(const address_t& m1, const address_t& m2)
@@ -64,19 +66,20 @@ void initdb()
     std::ifstream file("Bitcoin_addresses_August_13_2023.txt");
 
     uint64_t entries{0};
+    std::string matchtype = current == BTC_COMPAT ? std::string("3") : std::string("1");
 
     std::string line;
     while (std::getline(file, line)) {
-       if (line.substr(0, 3) != std::string("bc1")) {
+        if (line.substr(0,1) == matchtype) {
 
-         address_t entry;
-         memcpy(entry.bytes, line.c_str(), 12);
+            address_t entry;
+            memcpy(entry.bytes, line.c_str(), 12);
 
-         ++entries;
-         unsigned int a = (unsigned int)entry.bytes[8];
-         unsigned int c = (unsigned int)entry.bytes[9];
-         addresses[a][c].push_back(entry);
-       }
+            ++entries;
+            unsigned int a = (unsigned int)entry.bytes[8];
+            unsigned int c = (unsigned int)entry.bytes[9];
+            addresses[a][c].push_back(entry);
+        }
     };
 
     printf("%d addresses loaded..\n", entries);

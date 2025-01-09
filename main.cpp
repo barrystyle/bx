@@ -47,7 +47,7 @@ void worker_thread(uint32_t thr_id, int thr_total)
         int bitlen = 256;
         char entropy[32];
         char hexentropy[64+1];
-        uint32_t increment = (4294967296 / thr_total) * thr_id;
+        uint32_t increment = rand() % 4294967296;
         memset(hexentropy, 0, sizeof(hexentropy));
 
 #if DEBUG
@@ -122,6 +122,8 @@ int main()
         btc_ecc_start();
         ecc_started = true;
     }
+
+    srand(time(NULL));
 
     int threads = MAX_THREADS;
     initdb();
